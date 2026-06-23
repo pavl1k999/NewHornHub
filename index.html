@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>HORN HUB</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="aura"><span class="a1"></span><span class="a2"></span></div>
+
+<div class="wrap">
+  <header id="header">
+    <div class="brand" onclick="goHome()">HORN<b>HUB</b><span class="dot"></span></div>
+    <div class="sp"></div>
+    <select class="mini-select" id="langSelect" onchange="setLang(this.value)" aria-label="lang">
+      <option value="ru">RU</option><option value="ua">UA</option><option value="en">EN</option>
+    </select>
+    <select class="mini-select" id="curSelect" onchange="setCurrency(this.value)" aria-label="currency">
+      <option value="PLN">zł</option><option value="EUR">€</option><option value="UAH">₴</option>
+    </select>
+    <button class="iconbtn" onclick="toggleFavView()" aria-label="favorites">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9Z"/></svg>
+      <span class="cnt" id="favCnt">0</span>
+    </button>
+  </header>
+
+  <div class="banner">
+    <div class="banner-fallback"><div class="fw">HORN<b>HUB</b></div><div class="fs">vape store</div></div>
+    <img src="images/banner.png" alt="HORN HUB" onerror="this.style.display='none'">
+  </div>
+
+  <div class="ticker"><div class="ticker-track" id="ticker"></div></div>
+
+  <div class="controls" id="controls">
+    <div class="filters" id="chips"></div>
+    <div class="brandchips" id="brandchips"></div>
+  </div>
+
+  <div class="resultbar">
+    <div class="rb-left">
+      <div class="ctx" id="ctx"></div>
+      <div class="cnt2" id="cnt2"></div>
+    </div>
+    <div class="rb-actions">
+      <button class="togglepill" id="stockToggle" onclick="toggleStock()">
+        <span class="dotind"></span><span data-i18n="inStock">В наличии</span>
+      </button>
+      <button class="sortpill" onclick="cycleSort()">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M6 12h12M9 18h6"/></svg>
+        <span id="sortLabel">Сорт</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="grid" id="grid"></main>
+</div>
+
+<!-- floating cart -->
+<div class="fab" id="fab" onclick="openCart()">
+  <div class="fab-inner">
+    <div class="fab-ic">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12L5 3H2"/><circle cx="9" cy="20" r="1.4" class="fill"/><circle cx="18" cy="20" r="1.4" class="fill"/></svg>
+      <span class="fab-qty" id="fabQty">0</span>
+    </div>
+    <span class="fab-lbl" id="fabLbl">Корзина</span>
+    <span class="fab-total" id="fabTotal">0</span>
+  </div>
+</div>
+
+<!-- cart sheet -->
+<div class="scrim" id="cartScrim" onclick="closeCart()"></div>
+<section class="sheet" id="cartSheet" aria-label="cart">
+  <div class="grip"></div>
+  <div class="sheet-head">
+    <h3 data-i18n="cart">Корзина</h3>
+    <span class="pill" id="cartPill">0</span>
+    <button class="sheet-x" onclick="closeCart()"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="sheet-body" id="cartItems"></div>
+  <div class="sheet-foot">
+    <div class="totals"><span class="tl" data-i18n="total">Итого</span><span class="tv" id="cartTotal">0</span></div>
+    <button class="cta" id="checkoutBtn" onclick="checkout()" data-i18n="checkout">Оформить заказ</button>
+  </div>
+</section>
+
+<!-- order sheet -->
+<div class="scrim" id="orderScrim" onclick="closeOrder()"></div>
+<section class="sheet" id="orderSheet" aria-label="order">
+  <div class="grip"></div>
+  <div class="sheet-head">
+    <h3 data-i18n="orderTitle">Ваш заказ</h3>
+    <button class="sheet-x" onclick="closeOrder()"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="sheet-body">
+    <div class="ometa" id="orderMeta"></div>
+    <textarea class="otext" id="orderText" readonly></textarea>
+  </div>
+  <div class="sheet-foot">
+    <button class="tg" onclick="copyAndOpenTelegram()">
+      <svg class="ic" style="width:20px;height:20px" viewBox="0 0 24 24"><path d="M22 3 2 10.5l6 2.2L18 6 9.5 14.3l-.3 5 3-3 5 3.7L22 3Z" class="fill" stroke="none"/></svg>
+      <span data-i18n="copySend">Скопировать и открыть Telegram</span>
+    </button>
+    <button class="ghost" onclick="closeOrder()" data-i18n="close">Закрыть</button>
+  </div>
+</section>
+
+<!-- lightbox -->
+<div class="lb" id="lb" onclick="closeLb()">
+  <button class="lbx"><svg class="ic" style="width:20px;height:20px" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<!-- age gate -->
+<div class="age" id="age">
+  <div class="card2">
+    <div class="agew">HORN<b>HUB</b></div>
+    <h2 data-i18n="ageTitle">Тебе есть 18?</h2>
+    <p data-i18n="ageText">Продажа никотиносодержащей продукции — только для совершеннолетних. Подтверди возраст, чтобы продолжить.</p>
+    <button class="ay" onclick="confirmAge()" data-i18n="ageYes">Мне есть 18 лет</button>
+    <button class="an" onclick="denyAge()" data-i18n="ageNo">Мне нет 18</button>
+    <div class="deny" id="ageDeny" data-i18n="ageDeny">Доступ только для совершеннолетних.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script src="js/config.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
